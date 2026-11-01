@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>La nutrition des êtres vivants</title>
+  <meta name="description" content="Application libre de SVT (5e) : photosynthèse, réseaux trophiques, respiration et mycorhizes, avec des expériences interactives, un atelier et un espace enseignant.">
+  <link rel="icon" href="img/icone.svg" type="image/svg+xml">
+  <link rel="preload" href="polices/lexend.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css?v=1">
+</head>
+<body>
+<main class="page">
+  <header class="hero">
+    <div class="hero-texte">
+      <div class="hero-marque"><img src="img/icone.svg" alt="" width="44" height="44"><span>Nutrition</span></div>
+      <h1>Comment se nourrissent les êtres vivants ?</h1>
+      <p>D'où vient la matière d'un arbre ? Comment vit un champignon sans bouche ni chlorophylle ? Mène l'enquête avec des expériences à manipuler.</p>
+      <div class="hero-puces"><span>SVT · 5e</span><span>Gratuit et sans compte</span><span>Ordinateur, tablette, téléphone</span></div>
+    </div>
+    <div class="hero-visuel" aria-hidden="true">
+      <svg viewBox="0 0 400 270">
+        <defs>
+          <linearGradient id="ciel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bae6fd"/><stop offset="1" stop-color="#ecfccb"/></linearGradient>
+          <marker id="fh" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker>
+        </defs>
+        <rect width="400" height="270" fill="url(#ciel)"/>
+        <circle cx="52" cy="48" r="26" fill="#fde047"/><g stroke="#facc15" stroke-width="3" stroke-linecap="round"><path d="M52,10v8M52,78v8M14,48h8M82,48h8M25,21l6,6M73,69l6,6M25,75l6-6M73,27l6-6"/></g>
+        <rect y="190" width="400" height="80" fill="#8b6a46"/>
+        <path d="M200,190 C190,215 160,230 120,250 M205,190 C215,220 250,232 300,255 M202,190 V262" stroke="#6b4a2b" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <path d="M130,246 C110,236 80,250 60,240 M290,250 C310,236 340,252 370,238 M202,258 C185,250 170,262 150,260" stroke="#fdf6e3" stroke-width="2" fill="none" opacity=".9"/>
+        <path d="M190,192 C192,150 194,120 196,95 L208,95 C210,120 212,150 214,192 Z" fill="#6b3f1d"/>
+        <circle cx="202" cy="78" r="50" fill="#16a34a"/><circle cx="158" cy="98" r="36" fill="#22c55e"/><circle cx="248" cy="96" r="38" fill="#15803d"/>
+        <path d="M296,190 v-14" stroke="#f5f0e1" stroke-width="7"/><path d="M280,178 q16,-24 32,0 z" fill="#92400e"/>
+        <text x="110" y="188" font-size="22">🐌</text>
+        <path d="M110,40 C130,40 140,50 150,62" stroke="#475569" stroke-width="3" fill="none" marker-end="url(#fh)"/>
+        <text x="90" y="34" font-size="13" font-weight="700" fill="#334155" font-family="system-ui">CO₂</text>
+        <path d="M262,48 C285,30 305,28 325,32" stroke="#0284c7" stroke-width="3" fill="none" marker-end="url(#fh)"/>
+        <text x="330" y="38" font-size="13" font-weight="700" fill="#0284c7" font-family="system-ui">O₂</text>
+        <g fill="#c4b5fd" stroke="#6d28d9"><circle cx="70" cy="222" r="3"/><circle cx="330" cy="215" r="3"/><circle cx="250" cy="248" r="3"/><circle cx="160" cy="214" r="3"/></g>
+      </svg>
+    </div>
+  </header>
+
+  <section class="seance" id="seance" hidden>
+    <h2>Ta séance du jour</h2>
+    <ol id="seance-liste"></ol>
+  </section>
+
+  <div class="bandeau-prof partie-prof">
+    <span class="bp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 9l9-5 9 5-9 5-9-5z M7 11.2V16c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.8 M21 9v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <p><b>Vous êtes enseignant ?</b> Choisissez les séances, envoyez un lien à vos élèves, puis lisez leurs codes de rendu.</p>
+    <button class="btn btn-principal" id="ouvrir-prof-haut" type="button">Préparer une séance</button>
+  </div>
+
+  <section class="entrees" aria-label="Choisir une activité">
+    <a class="entree entree-parcours" href="parcours.html">
+      <span class="entree-icone" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2zm0 0A2 2 0 0 0 6 21h13 M9 7h6 M9 11h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="entree-sur">Parcours guidé</span>
+      <span class="entree-titre">Les quatre séances</span>
+      <span class="entree-texte">Photosynthèse, réseaux trophiques, respiration et mycorhizes. Chaque séance part d'une énigme, avec des expériences, des questions et un bilan à compléter.</span>
+      <span class="entree-progres"><span class="barre-progres"><span id="progres-barre"></span></span><span class="progres-texte" id="progres-texte">4 séances</span></span>
+      <span class="entree-action" id="action-parcours">Commencer le parcours <span aria-hidden="true">→</span></span>
+    </a>
+    <a class="entree entree-atelier" href="atelier.html">
+      <span class="entree-icone" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28"><path d="M9 3h6 M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3 M7 15h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="entree-sur">Atelier</span>
+      <span class="entree-titre">S'entraîner</span>
+      <span class="entree-texte">Quatre missions à refaire librement : construire un réseau trophique, prévoir les échanges de gaz, trier les êtres vivants, relever le défi bilan.</span>
+      <span class="entree-progres"><span class="progres-texte" id="progres-atelier">Ton meilleur score est gardé</span></span>
+      <span class="entree-action">Ouvrir l'atelier <span aria-hidden="true">→</span></span>
+    </a>
+  </section>
+
+  <footer class="pied-accueil">
+    <span class="partie-prof"><button class="lien" id="ouvrir-prof" type="button">Espace enseignant</button> ·</span>
+    <button class="lien" id="ouvrir-credits" type="button">Crédits et licences</button> ·
+    <span>Logiciel libre (GPL v3)</span>
+  </footer>
+</main>
+
+<dialog id="dlg-prof">
+  <form method="dialog" class="dlg">
+    <h2>Espace enseignant</h2>
+    <ol class="guide-prof">
+      <li>Cochez ce que vos élèves doivent faire.</li>
+      <li>Copiez le lien et donnez-le-leur (ENT, Pronote, QR code…). Ils ne verront pas cet espace.</li>
+      <li>À la fin, chaque élève clique sur « Rendre mon travail » et vous envoie son code.</li>
+      <li>Collez tous les codes ci-dessous : vous obtenez un tableau.</li>
+    </ol>
+    <fieldset>
+      <legend>1. Le travail à faire</legend>
+      <div class="choix-grille" id="prof-choix">
+        <label><input type="checkbox" value="ch1" checked> Séance I : la photosynthèse</label>
+        <label><input type="checkbox" value="ch2"> Séance II : les réseaux trophiques</label>
+        <label><input type="checkbox" value="ch3"> Séance III : la respiration</label>
+        <label><input type="checkbox" value="ch4"> Séance IV : les mycorhizes</label>
+        <label><input type="checkbox" value="trace"> La trace écrite</label>
+        <label><input type="checkbox" value="m-reseau"> Mission : réseau trophique</label>
+        <label><input type="checkbox" value="m-gaz"> Mission : laboratoire des gaz</label>
+        <label><input type="checkbox" value="m-tri"> Mission : autotrophe ou hétérotrophe</label>
+        <label><input type="checkbox" value="m-quiz"> Mission : défi bilan</label>
+      </div>
+    </fieldset>
+    <fieldset class="encadre-lien">
+      <legend>2. Le lien pour vos élèves</legend>
+      <input type="text" id="prof-lien" readonly>
+      <div class="ligne"><button class="btn btn-principal" type="button" id="prof-copier">Copier le lien</button><a class="btn" id="prof-tester" target="_blank" rel="noopener">Tester comme un élève</a></div>
+      <p class="note" id="prof-etat" aria-live="polite"></p>
+    </fieldset>
+    <fieldset>
+      <legend>3. Après la séance : lire les codes de rendu</legend>
+      <textarea id="prof-codes" rows="4" placeholder="Collez ici un ou plusieurs codes (un par ligne)…"></textarea>
+      <div class="ligne"><button class="btn btn-principal" type="button" id="prof-lire">Lire les codes</button><button class="btn" type="button" id="prof-tsv" hidden>Copier le tableau (pour un tableur)</button></div>
+      <div class="tableau-defile" id="prof-tableau"></div>
+      <p class="note">Les codes sont brouillés et contrôlés : un code modifié à la main est refusé. Sans serveur, ils ne sont pas infalsifiables pour autant. Aucune donnée n'est envoyée en ligne.</p>
+    </fieldset>
+    <div class="dlg-actions"><button class="btn" value="fermer">Fermer</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-credits">
+  <form method="dialog" class="dlg">
+    <h2>Crédits et licences</h2>
+    <p>Application libre sous licence <b>GPL v3</b>, conçue pour la SVT au collège (5e, séquence « La nutrition des êtres vivants »). Elle a été vibecodée avec Claude (Anthropic).</p>
+    <p>Police <b>Lexend</b> (SIL Open Font License), hébergée avec l'application. Les dessins et schémas sont faits pour l'application. Les données des expériences sont simplifiées à partir de documents classiques (Van Helmont, Ingenhousz, mesures sur graines germées, pépinières mycorhizées).</p>
+    <p class="note">Aucun compte, aucun cookie, aucune donnée envoyée : la progression reste dans le navigateur de l'élève.</p>
+    <div class="dlg-actions"><button class="btn" value="fermer">Fermer</button></div>
+  </form>
+</dialog>
+
+<script src="js/commun.js?v=1"></script>
+<script src="js/accueil.js?v=1"></script>
+</body>
+</html>

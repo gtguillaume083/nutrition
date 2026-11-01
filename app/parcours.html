@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>La nutrition des êtres vivants — parcours</title>
+  <meta name="description" content="Parcours guidé de SVT (5e) : photosynthèse, réseaux trophiques, respiration et mycorhizes, avec des expériences interactives et une trace écrite.">
+  <link rel="icon" href="img/icone.svg" type="image/svg+xml">
+  <link rel="preload" href="polices/lexend.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css?v=1">
+  <link rel="stylesheet" href="css/parcours.css?v=1">
+</head>
+<body class="parcours">
+
+<header class="p-entete">
+  <button class="btn p-menu" id="p-menu" aria-expanded="false" aria-controls="sommaire">☰ Séances</button>
+  <a class="p-marque" href="index.html" title="Accueil">
+    <img src="img/icone.svg" alt="" width="36" height="36">
+    <span>La nutrition des êtres vivants</span>
+  </a>
+  <div class="p-progression" aria-label="Progression">
+    <div class="p-barre"><div id="p-barre-remplie"></div></div>
+    <span id="p-progression-texte"></span>
+  </div>
+  <nav class="p-liens">
+    <a href="#trace" class="btn masquable">Trace écrite</a>
+    <a href="atelier.html" class="btn masquable">L'atelier</a>
+    <button class="btn" id="p-rendre" type="button">Rendre<span class="masquable"> mon travail</span></button>
+  </nav>
+</header>
+
+<div class="p-corps">
+  <nav id="sommaire" aria-label="Séances"></nav>
+  <div class="p-voile" id="p-voile"></div>
+  <main id="chapitre" tabindex="-1"></main>
+</div>
+
+<script src="js/commun.js?v=1"></script>
+<script src="js/experiences.js?v=1"></script>
+<script src="js/parcours.js?v=1"></script>
+</body>
+</html>
