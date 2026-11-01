@@ -158,11 +158,11 @@
     const items = [
       ["🌳 Chêne", "a"], ["🌻 Tournesol", "a"], ["🌿 Mousse", "a"], ["🟢 Algue verte", "a"], ["🌾 Blé", "a"], ["🌲 Pin", "a"],
       ["🍄 Cèpe", "h"], ["🍞 Levure", "h"], ["🦠 Bactérie du sol", "h"], ["🐌 Escargot", "h"], ["🐄 Vache", "h"], ["🧍 Être humain", "h"], ["🟫 Moisissure", "h"], ["🪱 Ver de terre", "h"],
-    ].map(([t, c]) => ({ t, c, aide: c === "a" ? "Il possède de la chlorophylle : il fabrique sa matière organique par photosynthèse." : "Il ne fait pas de photosynthèse : il doit consommer de la matière organique." }));
+    ].map(([t, c]) => ({ t, c, aide: c === "a" ? "Il possède de la chlorophylle : il fabrique sa matière organique à partir de matière minérale, par photosynthèse." : "Il ne fait pas de photosynthèse : il a besoin de matière organique pour fabriquer la sienne." }));
     const debut = Date.now();
     Nutri.tri(el, {
       consigne: "Range chaque être vivant le plus vite possible, sans te tromper.",
-      categories: [{ id: "a", titre: "Autotrophe", sous: "fabrique sa matière organique" }, { id: "h", titre: "Hétérotrophe", sous: "consomme de la matière organique" }],
+      categories: [{ id: "a", titre: "Autotrophe", sous: "fabrique sa matière à partir de matière minérale" }, { id: "h", titre: "Hétérotrophe", sous: "a besoin de matière organique pour fabriquer la sienne" }],
       items,
       graine: debut & 0xffff,
       surFin: ({ erreurs }) => {

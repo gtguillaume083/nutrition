@@ -40,7 +40,7 @@
         { q: "Où a lieu la photosynthèse dans la cellule ?", options: ["Dans le noyau", "Dans les chloroplastes", "Dans la paroi"], bonne: 1,
           expl: "Dans les chloroplastes, qui contiennent la chlorophylle, le pigment vert." },
       ],
-      retiens: `<p>Les végétaux chlorophylliens fabriquent leur propre matière organique : c'est la <b>photosynthèse</b>. Elle a lieu dans les <b>chloroplastes</b>, grâce à la <b>chlorophylle</b> et à la <b>lumière</b>.</p>
+      retiens: `<p>Les végétaux chlorophylliens fabriquent leur propre matière organique à partir de matière minérale : c'est la <b>photosynthèse</b>. Elle a lieu dans les <b>chloroplastes</b>, grâce à la <b>chlorophylle</b> et à la <b>lumière</b>.</p>
         <p>dioxyde de carbone + eau + sels minéraux → matière organique + <b>dioxygène</b></p>
         <p>Les plantes sont des êtres vivants <b>autotrophes</b> : elles fabriquent leur matière organique à partir de matière <b>minérale</b>.</p>`,
     },
@@ -49,6 +49,7 @@
       enigme: `Dans la litière d'une forêt, sous les feuilles mortes, poussent des champignons. Ils ne sont pas verts : pas de chlorophylle, donc <b>pas de photosynthèse</b>. Pas de bouche non plus. <b>Comment se nourrissent-ils ?</b>`,
       decouvre: `<p>Un champignon est formé de filaments microscopiques, les <b>hyphes</b>, qui forment dans le sol un réseau appelé <b>mycélium</b>. Le champignon sécrète dans le sol des substances qui <b>dégradent</b> la matière organique morte (feuilles, bois), puis il <b>absorbe</b> les petites molécules obtenues.</p>
         <p>Les champignons et les animaux ne peuvent pas fabriquer leur matière organique à partir de matière minérale : ils doivent <b>consommer de la matière organique</b>. On dit qu'ils sont <b>hétérotrophes</b>.</p>
+        <p>Comme tous les êtres vivants, ils fabriquent pourtant leur propre matière (chair, filaments…), mais à partir de la matière organique qu'ils consomment.</p>
         <div class="doc"><div class="doc-titre">Un réseau trophique de forêt méditerranéenne (chênes-lièges du Var)</div><ul>
           <li>Les feuilles de chêne sont mangées par la limace et le criquet.</li>
           <li>La limace est mangée par le hérisson et le renard.</li>
@@ -70,13 +71,13 @@
         { titre: "2. Qui fait quoi dans l'écosystème ?", faire: (el) => Nutri.tri(el, {
           consigne: "Range chaque être vivant dans la bonne colonne (glisse-le, ou touche-le puis touche une colonne).",
           categories: [
-            { id: "p", titre: "Producteur", sous: "fabrique la matière organique" },
+            { id: "p", titre: "Producteur", sous: "produit de la matière organique à partir de matière minérale" },
             { id: "c1", titre: "Consommateur primaire", sous: "mange des producteurs" },
             { id: "c2", titre: "Consommateur secondaire", sous: "mange des consommateurs" },
             { id: "d", titre: "Décomposeur", sous: "dégrade la matière morte" },
           ],
           items: [
-            { t: "🌳 Chêne", c: "p", aide: "Le chêne fait la photosynthèse : il fabrique sa matière organique." },
+            { t: "🌳 Chêne", c: "p", aide: "Le chêne fait la photosynthèse : il fabrique sa matière organique à partir de matière minérale." },
             { t: "🐌 Limace", c: "c1", aide: "La limace mange des feuilles de chêne." },
             { t: "🦗 Criquet", c: "c1", aide: "Le criquet mange des feuilles." },
             { t: "🦔 Hérisson", c: "c2", aide: "Le hérisson mange des limaces." },
@@ -92,14 +93,14 @@
         { q: "Un champignon peut-il faire la photosynthèse ?", options: ["Oui, comme les plantes", "Non, il n'a pas de chlorophylle"], bonne: 1,
           expl: "Sans chlorophylle, pas de photosynthèse : le champignon doit absorber de la matière organique." },
         { q: "La limace, le renard et les champignons sont…", options: ["autotrophes", "hétérotrophes"], bonne: 1,
-          expl: "Ils doivent consommer de la matière organique produite par d'autres êtres vivants." },
+          expl: "Ils fabriquent leur matière à partir de matière organique produite par d'autres êtres vivants." },
         { q: "Dans une chaîne alimentaire, la flèche signifie…", options: ["« mange »", "« est mangé par »"], bonne: 1,
           expl: "Chêne → limace se lit : « le chêne est mangé par la limace ». La flèche montre le trajet de la matière." },
         { q: "Sans décomposeurs, que deviendraient les sels minéraux du sol ?", options: ["Ils augmenteraient", "Ils s'épuiseraient : la matière morte ne serait plus recyclée"], bonne: 1,
           expl: "Les décomposeurs transforment la matière organique morte en sels minéraux, réutilisés par les plantes." },
       ],
       retiens: `<p>Les animaux et les champignons sont <b>hétérotrophes</b> : ils se nourrissent de matière organique produite par d'autres êtres vivants.</p>
-        <p>Dans un écosystème, les <b>producteurs</b> (végétaux chlorophylliens) fabriquent la matière organique ; les <b>consommateurs</b> la mangent ; les <b>décomposeurs</b> (champignons, bactéries) dégradent la matière morte en <b>sels minéraux</b>.</p>
+        <p>Dans un écosystème, les <b>producteurs</b> (végétaux chlorophylliens) produisent la matière organique à partir de matière minérale ; les <b>consommateurs</b> la mangent ; les <b>décomposeurs</b> (champignons, bactéries) dégradent la matière morte en <b>sels minéraux</b>.</p>
         <p>Les relations « est mangé par » forment des chaînes alimentaires, reliées en un <b>réseau trophique</b>.</p>`,
     },
     {
@@ -191,7 +192,7 @@
     ["Chloroplaste", "Petit élément vert des cellules végétales où a lieu la photosynthèse."],
     ["Consommateur", "Être vivant qui se nourrit d'autres êtres vivants (plantes ou animaux)."],
     ["Décomposeur", "Être vivant (champignon, bactérie) qui dégrade la matière organique morte en sels minéraux."],
-    ["Hétérotrophe", "Être vivant qui doit consommer de la matière organique pour se nourrir (animaux, champignons)."],
+    ["Hétérotrophe", "Être vivant qui fabrique sa matière organique à partir de matière organique prélevée sur d'autres êtres vivants (animaux, champignons)."],
     ["Matière minérale", "Eau, dioxyde de carbone, sels minéraux : matière qui ne vient pas d'un être vivant."],
     ["Matière organique", "Matière fabriquée par les êtres vivants (glucides, bois, chair…)."],
     ["Mutualisme", "Association entre deux espèces où les deux partenaires sont gagnants."],
@@ -234,8 +235,8 @@
       <p>La matière d'un arbre vient donc surtout du <b>dioxyde de carbone de l'air</b>, et non de la terre : la terre n'apporte que l'eau et un peu de sels minéraux.</p>
 
       <h2>2. Les animaux et les champignons consomment de la matière organique</h2>
-      <p>Les animaux et les champignons ne peuvent pas fabriquer leur matière organique à partir de matière minérale : ils sont <b>hétérotrophes</b>. Les animaux mangent d'autres êtres vivants ; les champignons absorbent la matière organique qu'ils ont dégradée dans le sol.</p>
-      <p>Dans un écosystème, les <b>producteurs</b> fabriquent la matière organique, les <b>consommateurs</b> la mangent et les <b>décomposeurs</b> (champignons, bactéries) dégradent la matière morte en sels minéraux, réutilisés par les plantes. Les relations « est mangé par » forment un <b>réseau trophique</b>.</p>
+      <p>Les animaux et les champignons ne peuvent pas fabriquer leur matière organique à partir de matière minérale : ils sont <b>hétérotrophes</b>. Comme tous les êtres vivants, ils fabriquent leur propre matière, mais à partir de la matière organique qu'ils prélèvent sur d'autres êtres vivants. Les animaux mangent d'autres êtres vivants ; les champignons absorbent la matière organique qu'ils ont dégradée dans le sol.</p>
+      <p>Dans un écosystème, les <b>producteurs</b> produisent la matière organique à partir de matière minérale, les <b>consommateurs</b> la mangent et les <b>décomposeurs</b> (champignons, bactéries) dégradent la matière morte en sels minéraux, réutilisés par les plantes. Les relations « est mangé par » forment un <b>réseau trophique</b>.</p>
       <figure>${schemaMatiere()}<figcaption>Schéma bilan : la matière circule et se recycle dans un écosystème.</figcaption></figure>
 
       <h2>3. Tous les êtres vivants respirent</h2>
