@@ -7,7 +7,7 @@
   <meta name="description" content="Application libre de SVT (5e) : photosynthèse, réseaux trophiques, respiration et mycorhizes, avec des expériences interactives, un atelier et un espace enseignant.">
   <link rel="icon" href="img/icone.svg" type="image/svg+xml">
   <link rel="preload" href="polices/lexend.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/style.css?v=3">
 </head>
 <body>
 <main class="page">
@@ -49,7 +49,7 @@
 
   <div class="bandeau-prof partie-prof">
     <span class="bp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 9l9-5 9 5-9 5-9-5z M7 11.2V16c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.8 M21 9v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-    <p><b>Vous êtes enseignant ?</b> Choisissez les séances, envoyez un lien à vos élèves, puis lisez leurs codes de rendu.</p>
+    <p><b>Vous êtes enseignant ?</b> Choisissez les séances, envoyez un lien à vos élèves, puis lisez leurs bilans.</p>
     <button class="btn btn-principal" id="ouvrir-prof-haut" type="button">Préparer une séance</button>
   </div>
 
@@ -85,8 +85,8 @@
     <ol class="guide-prof">
       <li>Cochez ce que vos élèves doivent faire.</li>
       <li>Copiez le lien et donnez-le-leur (ENT, Pronote, QR code…). Ils ne verront pas cet espace.</li>
-      <li>À la fin, chaque élève clique sur « Rendre mon travail » et vous envoie son code.</li>
-      <li>Collez tous les codes ci-dessous : vous obtenez un tableau.</li>
+      <li>À la fin, chaque élève clique sur « Mon bilan » : il voit ses résultats et télécharge un petit fichier dont le nom contient tout (nom, classe, code).</li>
+      <li>Récupérez les fichiers (dossier de l'ordinateur, ENT…) et glissez-les ci-dessous, ou tapez les codes relevés sur l'écran ou une photo.</li>
     </ol>
     <fieldset>
       <legend>1. Le travail à faire</legend>
@@ -109,11 +109,14 @@
       <p class="note" id="prof-etat" aria-live="polite"></p>
     </fieldset>
     <fieldset>
-      <legend>3. Après la séance : lire les codes de rendu</legend>
-      <textarea id="prof-codes" rows="4" placeholder="Collez ici un ou plusieurs codes (un par ligne)…"></textarea>
-      <div class="ligne"><button class="btn btn-principal" type="button" id="prof-lire">Lire les codes</button><button class="btn" type="button" id="prof-tsv" hidden>Copier le tableau (pour un tableur)</button></div>
+      <legend>3. Après la séance : lire les bilans</legend>
+      <label class="depot" id="prof-depot"><input type="file" id="prof-fichiers" multiple accept=".html,.htm,text/html" hidden>
+        <b>Glissez ici les fichiers des élèves</b><span>ou cliquez pour les choisir (plusieurs à la fois)</span></label>
+      <p class="note">Sans fichier : tapez une ligne par élève, recopiée de son écran ou d'une photo, par exemple <code>Léa Martin ; 5e2 ; K7M2-9QXP-3TBA-WQ4R-ZZZZ</code>. Les accents et majuscules n'ont pas d'importance.</p>
+      <textarea id="prof-codes" rows="3" placeholder="Prénom Nom ; classe ; code (une ligne par élève)"></textarea>
+      <div class="ligne"><button class="btn btn-principal" type="button" id="prof-lire">Ajouter ces lignes</button><button class="btn" type="button" id="prof-vider">Vider le tableau</button><button class="btn" type="button" id="prof-tsv" hidden>Copier le tableau (pour un tableur)</button></div>
       <div class="tableau-defile" id="prof-tableau"></div>
-      <p class="note">Les codes sont brouillés et contrôlés : un code modifié à la main est refusé. Sans serveur, ils ne sont pas infalsifiables pour autant. Aucune donnée n'est envoyée en ligne.</p>
+      <p class="note">Le code vérifie le nom, la classe et les résultats : une retouche ou une faute de frappe est signalée. Sans serveur, il n'est pas infalsifiable pour autant. Rien n'est envoyé en ligne : les fichiers sont lus dans votre navigateur.</p>
     </fieldset>
     <div class="dlg-actions"><button class="btn" value="fermer">Fermer</button></div>
   </form>
@@ -129,7 +132,7 @@
   </form>
 </dialog>
 
-<script src="js/commun.js?v=2"></script>
-<script src="js/accueil.js?v=2"></script>
+<script src="js/commun.js?v=3"></script>
+<script src="js/accueil.js?v=3"></script>
 </body>
 </html>

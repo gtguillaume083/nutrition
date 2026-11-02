@@ -37,7 +37,7 @@
   if (seance.length) {
     const fait = (id) => (progres[id] || {}).ok || (id.startsWith("m-") && missions[id.slice(2)]);
     $("#seance-liste").innerHTML = seance.map((id) => `<li><a href="${ELEMENTS[id][1]}">${ELEMENTS[id][0]}</a>${fait(id) ? " ✓" : ""}</li>`).join("")
-      + `<li>À la fin : clique sur <b>« Rendre mon travail »</b> (en haut du parcours ou de l'atelier) et envoie ton code à ton enseignant.</li>`;
+      + `<li>À la fin : clique sur <b>« Mon bilan »</b> (en haut du parcours ou de l'atelier), puis télécharge ton bilan ou montre-le à ton professeur.</li>`;
     $("#seance").hidden = false;
   }
 
@@ -57,26 +57,51 @@
     $("#prof-etat").textContent = "Lien copié ✓";
   });
 
+  /* bilans : fichiers déposés ou lignes tapées ; un élève n'apparaît qu'une fois (son bilan le plus récent) */
+  const bilans = new Map();
+  const refuses = [];
   let tsv = "";
-  $("#prof-lire").addEventListener("click", () => {
-    const lignes = $("#prof-codes").value.split(/\s+/).filter((x) => x.length > 8);
-    const etat = (p) => (!p ? "–" : p.ok ? `✓${p.err ? ` (${p.err} err.)` : ""}${p.aide ? " aide" : ""}` : `en cours${p.err ? ` (${p.err} err.)` : ""}`);
+  function ajouter(texte) {
+    const d = Nutri.lireBilan(texte);
+    if (!d) { refuses.push(texte); return; }
+    const cle = (d.n + "|" + d.k).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    const avant = bilans.get(cle);
+    if (!avant || avant.date <= d.date) bilans.set(cle, d);
+  }
+  function tableau() {
+    const etat = (p) => (!p ? "–" : p.ok ? `✓${p.err ? ` (${p.err}${p.err >= 31 ? "+" : ""} err.)` : ""}${p.aide ? " aide" : ""}` : `en cours${p.err ? ` (${p.err} err.)` : ""}`);
     const mis = (m, k) => (m && m[k] ? `${m[k].meilleur}/${m[k].sur}` : "–");
     const entete = ["Élève", "Classe", "Date", "Séance I", "Séance II", "Séance III", "Séance IV", "Réseau", "Gaz", "Tri", "Défi"];
-    const rangs = lignes.map((c) => {
-      const d = Nutri.lireRendu(c);
-      if (!d) return null;
-      const date = new Date(d.t * 60000).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
-      return [d.n, d.k || "", date, ...SEANCES.map((s) => etat((d.p || {})[s])), ...["reseau", "gaz", "tri", "quiz"].map((k) => mis(d.m, k))];
-    });
-    const bons = rangs.filter(Boolean).sort((a, b) => a[0].localeCompare(b[0], "fr"));
-    const refus = rangs.length - bons.length;
-    $("#prof-tableau").innerHTML = lignes.length ? `<table class="tableau-rendus"><thead><tr>${entete.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>
-      ${bons.map((r) => `<tr>${r.map((v, i) => `<td class="${i >= 3 && i <= 6 ? (v.startsWith("✓") ? "ok" : "ko") : ""}">${v.replace(/</g, "&lt;")}</td>`).join("")}</tr>`).join("")}
-      ${refus ? `<tr class="rendu-erreur"><td colspan="${entete.length}">${refus} code${refus > 1 ? "s" : ""} illisible${refus > 1 ? "s" : ""} ou modifié${refus > 1 ? "s" : ""}.</td></tr>` : ""}</tbody></table>` : "<p class=\"note\">Aucun code collé.</p>";
-    tsv = [entete, ...bons].map((r) => r.join("\t")).join("\n");
-    $("#prof-tsv").hidden = !bons.length;
+    const rangs = [...bilans.values()].map((d) => [d.n, d.k || "", d.date.toLocaleDateString("fr-FR"), ...SEANCES.map((s) => etat(d.p[s])), ...["reseau", "gaz", "tri", "quiz"].map((k) => mis(d.m, k))])
+      .sort((a, b) => a[1].localeCompare(b[1], "fr") || a[0].localeCompare(b[0], "fr"));
+    const esc = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    $("#prof-tableau").innerHTML = rangs.length || refuses.length ? `<p class="note"><b>${rangs.length} élève${rangs.length > 1 ? "s" : ""}</b></p><table class="tableau-rendus"><thead><tr>${entete.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>
+      ${rangs.map((r) => `<tr>${r.map((v, i) => `<td class="${i >= 3 && i <= 6 ? (v.startsWith("✓") ? "ok" : "ko") : ""}">${esc(v)}</td>`).join("")}</tr>`).join("")}
+      ${refuses.map((t) => `<tr class="rendu-erreur"><td colspan="${entete.length}">Illisible ou modifié : ${esc(t.slice(0, 120))}</td></tr>`).join("")}</tbody></table>` : "";
+    tsv = [entete, ...rangs].map((r) => r.join("\t")).join("\n");
+    $("#prof-tsv").hidden = !rangs.length;
+  }
+  async function lireFichiers(fichiers) {
+    for (const f of fichiers) {
+      if (Nutri.lireBilan(f.name)) { ajouter(f.name); continue; }
+      // fichier renommé : le code est aussi rangé dans le fichier
+      const texte = await f.text().catch(() => "");
+      const r = texte.match(/<meta name="nutrition-bilan" content="([^"]+)"/);
+      ajouter(r ? r[1].replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"') : f.name);
+    }
+    tableau();
+  }
+  const depot = $("#prof-depot");
+  $("#prof-fichiers").addEventListener("change", (e) => { lireFichiers([...e.target.files]); e.target.value = ""; });
+  ["dragenter", "dragover"].forEach((t) => depot.addEventListener(t, (e) => { e.preventDefault(); depot.classList.add("survol"); }));
+  ["dragleave", "drop"].forEach((t) => depot.addEventListener(t, () => depot.classList.remove("survol")));
+  depot.addEventListener("drop", (e) => { e.preventDefault(); lireFichiers([...e.dataTransfer.files]); });
+  $("#prof-lire").addEventListener("click", () => {
+    $("#prof-codes").value.split(/\r?\n/).map((x) => x.trim()).filter(Boolean).forEach(ajouter);
+    $("#prof-codes").value = "";
+    tableau();
   });
+  $("#prof-vider").addEventListener("click", () => { bilans.clear(); refuses.length = 0; tableau(); });
   $("#prof-tsv").addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(tsv); $("#prof-tsv").textContent = "Tableau copié ✓"; } catch (e) { /* presse-papiers refusé */ }
   });

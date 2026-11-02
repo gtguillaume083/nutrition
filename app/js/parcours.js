@@ -308,7 +308,7 @@
 
       <section class="bloc bloc-retiens"><h2><span class="pastille">4</span>Je retiens</h2><div class="retiens"></div></section>
 
-      <div class="fin-chapitre${f.ok ? " visible" : ""}"><p>Séance réussie ✓ Pense à fabriquer ton code de rendu si ton enseignant le demande.</p></div>
+      <div class="fin-chapitre${f.ok ? " visible" : ""}"><p>Séance réussie ✓ Clique sur « Mon bilan » si ton professeur te le demande.</p></div>
       <nav class="chap-nav">
         ${idx > 0 ? `<a class="btn" href="#${CHAPITRES[idx - 1].id}">← Séance précédente</a>` : "<span></span>"}
         <a class="btn btn-principal" href="#${suivant ? suivant.id : "trace"}">${suivant ? "Séance suivante →" : "La trace écrite →"}</a>

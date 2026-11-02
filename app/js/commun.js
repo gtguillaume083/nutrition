@@ -3,7 +3,7 @@
  * - mémoire facultative dans le navigateur (rien n'est envoyé en ligne) ;
  * - glisser-déposer (souris et doigt) ou « toucher puis toucher » ;
  * - textes à trous et tris en colonnes ;
- * - code de rendu que l'élève copie pour son enseignant.
+ * - bilan de l'élève : un code court qui contient tout, et un fichier qui porte ce code.
  */
 window.Nutri = (function () {
   "use strict";
@@ -228,87 +228,178 @@ window.Nutri = (function () {
     return etat;
   }
 
-  /* ---------- code de rendu ----------
-   * Le code contient le nom, la classe, les chapitres réussis (avec le nombre
-   * d'erreurs et l'aide utilisée) et les meilleurs scores de l'atelier.
-   * Il est brouillé et porte une empreinte : une modification à la main le
-   * rend illisible. Ce n'est pas infalsifiable (pas de serveur), mais cela
-   * décourage les retouches. */
+  /* ---------- bilan de l'élève ----------
+   * Le bilan tient dans un code court de 20 caractères (ex. K7M2-9QXP-3TBA-WQ4R-ZZZZ)
+   * qui contient tout : séances (réussie, bilan fait, aide, erreurs), missions
+   * (meilleur score, essais) et la date. Le nom et la classe restent en clair à
+   * côté du code, mais le code les vérifie : un nom changé ou un chiffre retouché
+   * rend le code invalide. Le fichier téléchargé porte ce code comme nom, ce qui
+   * suffit à l'enseignant pour tout relire. Sans serveur, ce n'est pas
+   * infalsifiable, mais cela décourage les retouches et repère les fautes de frappe. */
   const SEL = "nutrition-svt-rendu";
   function empreinte(texte) {
     let h = 0x811c9dc5;
     for (const c of SEL + texte) { h ^= c.codePointAt(0); h = Math.imul(h, 0x01000193) >>> 0; }
     return h;
   }
-  const b64 = (octets) => btoa(String.fromCharCode(...octets)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  const deb64 = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
-  function brouiller(octets, sel) {
-    const r = aleatoire(sel);
-    return octets.map((o) => o ^ Math.floor(r() * 256));
+  const SEANCES = ["ch1", "ch2", "ch3", "ch4"];
+  const MISSIONS = ["reseau", "gaz", "tri", "quiz"];
+  const SUR = { reseau: 10, gaz: 6, tri: 10, quiz: 10 };
+  const B32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"; // base 32 de Crockford : pas de I, L, O, U
+  const JOUR0 = Date.UTC(2026, 0, 1);
+  // nom et classe comparés sans accents, majuscules ni espaces (fichiers renommés par l'ENT, saisie à la main)
+  const simple = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  function controle(nom, classe, o) { return empreinte(simple(nom) + "|" + simple(classe) + "|" + o.join(",")) & 0xffff; }
+
+  function codeCourt(nom, classe, p, m, date = new Date()) {
+    const jour = Math.max(0, Math.min(4095, Math.floor((date - JOUR0) / 864e5)));
+    const o = [(1 << 4) | (jour >> 8), jour & 255];
+    SEANCES.forEach((c) => { const f = p[c] || {}; o.push((f.ok ? 128 : 0) | (f.bilan ? 64 : 0) | (f.aide ? 32 : 0) | Math.min(31, f.err || 0)); });
+    MISSIONS.forEach((k) => { const r = m[k]; o.push(r ? ((Math.min(14, r.meilleur) + 1) << 4) | Math.min(15, r.fait) : 0); });
+    const c = controle(nom, classe, o);
+    o.push(c >> 8, c & 255);
+    let n = 0n;
+    o.forEach((x) => { n = (n << 8n) | BigInt(x); });
+    n <<= 4n; // 96 bits complétés à 100 = 20 caractères
+    let s = "";
+    for (let i = 19; i >= 0; i--) s += B32[Number((n >> BigInt(5 * i)) & 31n)];
+    return s.match(/.{4}/g).join("-");
   }
-  function codeRendu(nom, classe) {
-    const p = memoire.lire("parcours");
-    const m = memoire.lire("missions");
-    const donnees = { v: 1, n: nom, k: classe, t: Math.round(Date.now() / 60000), p, m };
-    const json = JSON.stringify(donnees);
-    const sel = (Math.random() * 4294967296) >>> 0;
-    const corps = brouiller(new TextEncoder().encode(json), sel);
-    const tete = new Uint8Array(8);
-    new DataView(tete.buffer).setUint32(0, sel);
-    new DataView(tete.buffer).setUint32(4, empreinte(json));
-    return "N1." + b64([...tete, ...corps]);
+
+  function lireCourt(nom, classe, code) {
+    const s = code.toUpperCase().replace(/[^0-9A-Z]/g, "").replace(/O/g, "0").replace(/[IL]/g, "1");
+    if (s.length !== 20) return null;
+    let n = 0n;
+    for (const ch of s) { const v = B32.indexOf(ch); if (v < 0) return null; n = (n << 5n) | BigInt(v); }
+    n >>= 4n;
+    const o = [];
+    for (let i = 11; i >= 0; i--) o.push(Number((n >> BigInt(8 * i)) & 255n));
+    if (o[0] >> 4 !== 1) return null;
+    if (controle(nom, classe, o.slice(0, 10)) !== (o[10] << 8 | o[11])) return null;
+    const p = {}, m = {};
+    SEANCES.forEach((c, i) => { const x = o[2 + i]; if (x) p[c] = { ok: !!(x & 128), bilan: !!(x & 64), aide: !!(x & 32), err: x & 31 }; });
+    MISSIONS.forEach((k, i) => { const x = o[6 + i]; if (x) m[k] = { meilleur: (x >> 4) - 1, fait: x & 15, sur: SUR[k] }; });
+    return { n: nom, k: classe, date: new Date(JOUR0 + (((o[0] & 15) << 8) | o[1]) * 864e5), p, m, code: s.match(/.{4}/g).join("-") };
   }
+
+  /* lit une ligne « Nutrition · Prénom Nom · Classe · CODE » (nom de fichier, saisie,
+   * relevé sur une photo), ou un ancien code long « N1.… » */
+  function lireBilan(texte) {
+    const t = (texte || "").replace(/\.html?$/i, "").replace(/\s*\(\d+\)\s*$/, "").trim();
+    if (/^N1\./.test(t)) {
+      const d = lireRendu(t);
+      return d && { n: d.n, k: d.k, date: new Date(d.t * 60000), p: d.p || {}, m: d.m || {}, code: "(ancien code)" };
+    }
+    const r = t.match(/((?:[0-9A-Za-z]{4}[\s-]?){4}[0-9A-Za-z]{4})\s*$/);
+    if (!r) return null;
+    const morceaux = t.slice(0, r.index).split(/\s*[·;\t_|]\s*|\s+-\s+/).map((x) => x.trim()).filter((x) => x && !/^nutrition$/i.test(x));
+    if (morceaux.length < 2) return null;
+    const classe = morceaux.pop();
+    return lireCourt(morceaux.join(" "), classe, r[1]);
+  }
+
   function lireRendu(code) {
     try {
       const c = code.trim().replace(/\s+/g, "");
       if (!c.startsWith("N1.")) return null;
-      const o = deb64(c.slice(3));
+      const o = Uint8Array.from(atob(c.slice(3).replace(/-/g, "+").replace(/_/g, "/")), (x) => x.charCodeAt(0));
       const v = new DataView(o.buffer);
-      const json = new TextDecoder().decode(brouiller(o.slice(8), v.getUint32(0)));
+      const r = aleatoire(v.getUint32(0));
+      const json = new TextDecoder().decode(o.slice(8).map((x) => x ^ Math.floor(r() * 256)));
       if (empreinte(json) !== v.getUint32(4)) return null;
       return JSON.parse(json);
     } catch (e) { return null; }
   }
 
-  /* boîte « Rendre mon travail » (parcours et atelier) */
+  /* contenu du bilan (dans la boîte de l'élève et dans le fichier téléchargé) */
+  const TITRES = { ch1: "I. La photosynthèse", ch2: "II. Les réseaux trophiques", ch3: "III. La respiration", ch4: "IV. Les mycorhizes" };
+  const NOMS_MISSIONS = { reseau: "Réseau trophique", gaz: "Laboratoire des gaz", tri: "Autotrophe ou hétérotrophe", quiz: "Défi bilan" };
+  const echapper = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function bilanHtml(d) {
+    const ligneS = (c) => {
+      const f = d.p[c];
+      return `<tr><td>${TITRES[c]}</td><td>${!f ? "pas commencée" : f.ok ? "<b class=\"ok\">réussie ✓</b>" : "en cours"}</td><td>${f ? f.err + (f.err >= 31 ? " ou +" : "") : "–"}</td><td>${f && f.aide ? "oui" : "non"}</td></tr>`;
+    };
+    const ligneM = (k) => { const r = d.m[k]; return `<tr><td>${NOMS_MISSIONS[k]}</td><td>${r ? `<b>${r.meilleur} / ${SUR[k]}</b>` : "–"}</td><td>${r ? r.fait + (r.fait >= 15 ? " ou +" : "") : 0}</td></tr>`; };
+    return `<div class="bil">
+      <p class="bil-qui"><b>${echapper(d.n)}</b> · ${echapper(d.k)} · ${d.date.toLocaleDateString("fr-FR")}</p>
+      <table class="bil-t"><thead><tr><th>Séance</th><th>État</th><th>Erreurs</th><th>Correction affichée</th></tr></thead><tbody>${SEANCES.map(ligneS).join("")}</tbody></table>
+      <table class="bil-t"><thead><tr><th>Mission de l'atelier</th><th>Meilleur score</th><th>Essais</th></tr></thead><tbody>${MISSIONS.map(ligneM).join("")}</tbody></table>
+      <p class="bil-code-titre">Mon code</p><p class="bil-code">${d.code}</p></div>`;
+  }
+  const CSS_BILAN = `.bil-qui{font-size:1.15rem;margin:0 0 10px}.bil-t{border-collapse:collapse;width:100%;margin:8px 0;font-size:.92rem}
+    .bil-t th,.bil-t td{border:1px solid #c4d4ca;padding:5px 8px;text-align:left}.bil-t th{background:#e3f4f1}.bil .ok{color:#15803d}
+    .bil-code-titre{margin:12px 0 0;font-weight:600;color:#55665d}.bil-code{font:700 1.6rem/1.2 ui-monospace,Consolas,monospace;letter-spacing:.06em;margin:4px 0;color:#0b5f58;word-break:break-all}`;
+
+  function nomFichier(d) {
+    const propre = (s) => s.replace(/[\\/:*?"<>|·;_\t]/g, " ").replace(/\s+/g, " ").trim();
+    return `Nutrition · ${propre(d.n)} · ${propre(d.k) || "classe"} · ${d.code}.html`;
+  }
+  function fichierBilan(d) {
+    return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="nutrition-bilan" content="${echapper(nomFichier(d).replace(/\.html$/, ""))}">
+<title>Bilan · ${echapper(d.n)}</title><style>body{font:16px/1.5 system-ui,sans-serif;color:#14211b;max-width:720px;margin:24px auto;padding:0 16px}h1{font-size:1.4rem;color:#0b5f58}${CSS_BILAN}</style></head>
+<body><h1>La nutrition des êtres vivants : mon bilan</h1>${bilanHtml(d)}
+<p style="color:#55665d;font-size:.85rem">Ce fichier a été créé par l'application « La nutrition des êtres vivants ». Le code vérifie le nom, la classe et les résultats : s'il est modifié, il devient invalide.</p></body></html>`;
+  }
+
+  /* boîte « Mon bilan » (parcours et atelier) */
   function boiteRendu() {
     let d = $("#dlg-rendu");
     if (!d) {
       d = document.createElement("dialog");
       d.id = "dlg-rendu";
-      d.innerHTML = `<form method="dialog" class="dlg">
-        <h2>Rendre mon travail</h2>
-        <p class="note">Ce code contient ta progression : chapitres réussis, erreurs, scores de l'atelier. Copie-le et donne-le à ton enseignant (ENT, cahier de textes…).</p>
+      d.innerHTML = `<style>${CSS_BILAN}</style><form method="dialog" class="dlg">
+        <h2>Mon bilan</h2>
         <div class="ligne"><input type="text" id="r-nom" placeholder="Prénom et nom" autocomplete="name"><input type="text" id="r-classe" placeholder="Classe (ex. 5e2)"></div>
-        <div class="dlg-actions" style="justify-content:flex-start"><button class="btn btn-principal" type="button" id="r-fabriquer">Fabriquer mon code</button></div>
-        <textarea id="r-code" rows="4" readonly hidden></textarea>
+        <div class="dlg-actions" style="justify-content:flex-start"><button class="btn btn-principal" type="button" id="r-voir">Voir mon bilan</button></div>
         <p class="note" id="r-etat" aria-live="polite"></p>
-        <div class="dlg-actions"><button class="btn" type="button" id="r-copier" hidden>Copier le code</button><button class="btn" value="fermer">Fermer</button></div>
+        <div id="r-bilan"></div>
+        <div class="dlg-actions" id="r-actions" hidden>
+          <button class="btn btn-principal" type="button" id="r-telecharger">Télécharger mon bilan</button>
+          <button class="btn" type="button" id="r-copier">Copier le code</button>
+        </div>
+        <p class="note" id="r-aide" hidden>Enregistre le fichier là où ton professeur te l'a demandé (dossier de l'ordinateur, ENT…), ou montre-lui cet écran.</p>
+        <div class="dlg-actions"><button class="btn" value="fermer">Fermer</button></div>
       </form>`;
       document.body.append(d);
       const id = memoire.lire("eleve");
       $("#r-nom", d).value = id.n || "";
       $("#r-classe", d).value = id.k || "";
-      $("#r-fabriquer", d).addEventListener("click", () => {
+      let bilan = null;
+      function voir() {
         const n = $("#r-nom", d).value.trim();
         const k = $("#r-classe", d).value.trim();
-        if (!n) { $("#r-etat", d).textContent = "Écris d'abord ton prénom et ton nom."; $("#r-nom", d).focus(); return; }
+        if (!n || !k) { $("#r-etat", d).textContent = "Écris ton prénom, ton nom et ta classe."; $(n ? "#r-classe" : "#r-nom", d).focus(); return; }
         memoire.ecrire("eleve", { n, k });
-        const ta = $("#r-code", d);
-        ta.value = codeRendu(n, k);
-        ta.hidden = false;
-        $("#r-copier", d).hidden = false;
-        ta.select();
-        $("#r-etat", d).textContent = "Voici ton code. Copie-le en entier.";
+        const p = memoire.lire("parcours"), m = memoire.lire("missions");
+        bilan = lireCourt(n, k, codeCourt(n, k, p, m));
+        $("#r-bilan", d).innerHTML = bilanHtml(bilan);
+        $("#r-actions", d).hidden = $("#r-aide", d).hidden = false;
+        $("#r-etat", d).textContent = "";
+      }
+      $("#r-voir", d).addEventListener("click", voir);
+      $("#r-telecharger", d).addEventListener("click", () => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([fichierBilan(bilan)], { type: "text/html" }));
+        a.download = nomFichier(bilan);
+        document.body.append(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+        $("#r-etat", d).textContent = "Fichier téléchargé ✓ (" + a.download + ")";
       });
       $("#r-copier", d).addEventListener("click", async () => {
-        const ta = $("#r-code", d);
-        try { await navigator.clipboard.writeText(ta.value); } catch (e) { ta.select(); document.execCommand("copy"); }
-        $("#r-etat", d).textContent = "Code copié ✓ Colle-le là où ton enseignant te l'a demandé.";
+        const texte = nomFichier(bilan).replace(/\.html$/, "");
+        try { await navigator.clipboard.writeText(texte); $("#r-etat", d).textContent = "Copié ✓"; } catch (e) { $("#r-etat", d).textContent = texte; }
       });
+      d.addEventListener("close", () => { /* garde le bilan affiché pour une prochaine ouverture */ });
+      if (id.n && id.k) voir();
+    } else if ($("#r-nom", d).value && $("#r-classe", d).value) {
+      $("#r-voir", d).click(); // résultats à jour
     }
     d.showModal();
   }
 
-  return { $, $$, memoire, aleatoire, melanger, modeEleve, glisser, trous, tri, codeRendu, lireRendu, boiteRendu };
+  return { $, $$, memoire, aleatoire, melanger, modeEleve, glisser, trous, tri, codeCourt, lireCourt, lireBilan, bilanHtml, fichierBilan, nomFichier, boiteRendu };
 })();
